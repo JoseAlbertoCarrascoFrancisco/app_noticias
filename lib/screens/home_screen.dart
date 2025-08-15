@@ -93,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Expanded(
               child: filteredArticles.isEmpty
-                  ? const Center(child: Text('No se encontraron noticias'))
+                  ? const Center(child: Text('Por el momento no se encontraron noticias'))
                   : RefreshIndicator(
                 onRefresh: _refreshArticles,
                 child: ListView.builder(

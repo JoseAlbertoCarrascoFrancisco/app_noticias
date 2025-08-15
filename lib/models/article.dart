@@ -31,4 +31,12 @@ class Article {
       sourceName: json['source'] != null ? json['source']['name'] : null,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Article && other.url == url;
+
+  @override
+  int get hashCode => url.hashCode;
 }
