@@ -21,7 +21,7 @@ class ApiService {
 
     // Construye la URL con los parámetros de búsqueda
     final url = Uri.parse(
-      'https://newsapi.org/v2/everything?q=tesla&from=$fromDate&sortBy=publishedAt&apiKey=$_apiKey',
+      'https://newsapi.org/v2/everything?q=a OR the&from=$fromDate&sortBy=publishedAt&apiKey=$_apiKey',
     );
 
     // Hace la petición GET a la API
