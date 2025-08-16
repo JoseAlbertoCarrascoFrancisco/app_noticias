@@ -1,13 +1,15 @@
+// Importa Flutter y dependencias necesarias
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import '../models/article.dart';
-import 'package:android_intent_plus/android_intent.dart';
-import 'package:android_intent_plus/flag.dart';
+import 'package:flutter/services.dart'; // Para controlar el modo de la UI
+import '../models/article.dart'; // Modelo Article
+import 'package:android_intent_plus/android_intent.dart'; // Para abrir enlaces en Android
+import 'package:android_intent_plus/flag.dart'; // Flags para intents
 
+// Pantalla de detalle de un artículo
 class ArticleDetailScreen extends StatefulWidget {
-  final Article article;
-  final bool isFavorite;
-  final Function(Article) onFavoriteToggle;
+  final Article article; // El artículo que se va a mostrar
+  final bool isFavorite; // Indica si ya está en favoritos
+  final Function(Article) onFavoriteToggle; // Función para agregar/quitar favoritos
 
   const ArticleDetailScreen({
     super.key,
@@ -21,28 +23,34 @@ class ArticleDetailScreen extends StatefulWidget {
 }
 
 class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
+  // Estado interno para manejar si el artículo está en favoritos
   late bool isFavorite;
 
   @override
   void initState() {
     super.initState();
+    // Inicializa el estado del favorito con el valor recibido
     isFavorite = widget.isFavorite;
 
+    // Cambia la UI del sistema a "pantalla completa" inmersiva
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
   @override
   void dispose() {
+    // Restaura la UI normal cuando se sale de la pantalla
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
   }
 
+  // Función para agregar/quitar favoritos
   void _toggleFavorite() {
-    widget.onFavoriteToggle(widget.article);
+    widget.onFavoriteToggle(widget.article); // Llama la función enviada desde Home
     setState(() {
-      isFavorite = !isFavorite;
+      isFavorite = !isFavorite; // Cambia el estado
     });
 
+    // Muestra un mensaje flotante
     final message =
         isFavorite ? 'Noticia guardada' : 'Noticia eliminada de guardados';
 
@@ -54,29 +62,38 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final article = widget.article;
+
+    // Formatea la fecha de publicación (dd/mm/yyyy)
     final publishedDate =
         '${article.publishedAt.toLocal().day}/${article.publishedAt.toLocal().month}/${article.publishedAt.toLocal().year}';
 
     return Scaffold(
+      // Barra superior
       appBar: AppBar(
-        backgroundColor: Color(0xFFE0442E),
+        backgroundColor: const Color(0xFFE0442E),
         title: const Text("Nota Completa"),
         centerTitle: true,
       ),
+
+      // Cuerpo principal
       body: Column(
         children: [
+          // Contenido desplazable
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Título
                   Text(
                     article.title,
                     style: Theme.of(context).textTheme.titleLarge,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
+
+                  // Imagen principal si existe
                   if (article.urlToImage != null &&
                       article.urlToImage!.isNotEmpty)
                     ClipRRect(
@@ -84,6 +101,8 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
                       child: Image.network(article.urlToImage!),
                     ),
                   const SizedBox(height: 16),
+
+                  // Descripción si existe
                   if (article.description != null &&
                       article.description!.isNotEmpty)
                     Text(
@@ -91,6 +110,8 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   const SizedBox(height: 16),
+
+                  // Autor y fecha
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -111,15 +132,19 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
               ),
             ),
           ),
-          SafeArea( 
+
+          // Botones (dentro de SafeArea para evitar el notch)
+          SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Botón para abrir la nota completa en navegador
                   ElevatedButton(
                     onPressed: () async {
                       try {
+                        // Intenta abrir la URL en Android con un Intent
                         final intent = AndroidIntent(
                           action: 'action_view',
                           data: article.url,
@@ -127,6 +152,7 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
                         );
                         await intent.launch();
                       } catch (e) {
+                        // Si hay error, muestra un mensaje
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
@@ -138,12 +164,12 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 36),
+                      minimumSize: const Size(double.infinity, 36), // Botón ancho
                       padding: const EdgeInsets.symmetric(
                         vertical: 8,
                         horizontal: 10,
                       ),
-                      backgroundColor: Color(0xFFE0442E),
+                      backgroundColor: const Color(0xFFE0442E), 
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -154,6 +180,8 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
+
+                  // Botón flotante para favoritos
                   Align(
                     alignment: Alignment.centerRight,
                     child: FloatingActionButton(
@@ -164,8 +192,11 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
                           ? 'Quitar de favoritos'
                           : 'Agregar a favoritos',
                       child: Icon(
-                        isFavorite ? Icons.bookmark : Icons.bookmark_border,
-                        color: isFavorite ? Colors.orangeAccent : Colors.grey,
+                        isFavorite
+                            ? Icons.bookmark
+                            : Icons.bookmark_border, // Icono según estado
+                        color:
+                            isFavorite ? Colors.orangeAccent : Colors.grey,
                         size: 28,
                       ),
                     ),
